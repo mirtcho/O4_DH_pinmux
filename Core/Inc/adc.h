@@ -10,6 +10,7 @@ typedef enum {
 
 
 /* ---------------------------- public functions ---------------------------- */
+uint16_t* get_adc_raw_data(uint8_t adc_nr, uint8_t index);
 float adc_get(TE_ADC_VALUE idx);
 
 

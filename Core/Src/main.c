@@ -21,7 +21,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usb_device.h"
-
+#include "adc.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -58,7 +58,7 @@ TIM_HandleTypeDef htim1;
 UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN PV */
-uint16_t adc1_data[6],adc2_data[6],adc3_data[6];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -80,34 +80,26 @@ static void MX_USART3_UART_Init(void);
 /* USER CODE BEGIN 0 */
 
 /* ToDo move later in separate file */
-#define V_REF 2.5f
-struct {
-	float v12v_input;
-	float v12v_display;
-	float v3v3_half;
-	float v5v5_usb;
-	float btn;
-	float i12v;
-	float stm_Vbat;
-	float stm_Vref;
-	float stm_temperature;
-	float btn_lpf;
-}measurement;
-
-void update_measurements()
-{
-	//adc1 data
-	measurement.v12v_input   = V_REF*0.001391602f*adc1_data[0];
-	measurement.v12v_display = V_REF*0.001391602f*adc1_data[1];
-	measurement.v3v3_half	 = V_REF*0.000244141f*adc1_data[2];
-	//adc2 data
-	measurement.v5v5_usb	 = V_REF*0.000537109f*adc2_data[0];
-	measurement.btn			 = V_REF/4096*adc2_data[1];
-	//adc3
-	measurement.i12v		 = V_REF/(35*2048)*adc3_data[0];
-	measurement.stm_Vbat	 = V_REF*3/4096*adc3_data[1];
-}
 /* USER CODE END 0 */
+void adc_start()
+{
+	if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	if (HAL_ADCEx_Calibration_Start(&hadc2, ADC_SINGLE_ENDED) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	if (HAL_ADCEx_Calibration_Start(&hadc3, ADC_SINGLE_ENDED) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	HAL_Delay(100);
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)get_adc_raw_data(1,0), 3 );
+	HAL_ADC_Start_DMA(&hadc2, (uint32_t*)get_adc_raw_data(2,0), 2 );
+	HAL_ADC_Start_DMA(&hadc3, (uint32_t*)get_adc_raw_data(3,0), 3 );
+}
 
 /**
   * @brief  The application entry point.
@@ -148,24 +140,8 @@ int main(void)
   MX_USART3_UART_Init();
   MX_USB_Device_Init();
   /* USER CODE BEGIN 2 */
-
-  if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_ADCEx_Calibration_Start(&hadc2, ADC_SINGLE_ENDED) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_ADCEx_Calibration_Start(&hadc3, ADC_SINGLE_ENDED) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  HAL_Delay(100);
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&adc1_data[0], 3 );
-  HAL_ADC_Start_DMA(&hadc2, (uint32_t*)&adc2_data[0], 2 );
-  HAL_ADC_Start_DMA(&hadc3, (uint32_t*)&adc3_data[0], 3 );
-
+  /**/
+  adc_start();
   /*## Start PWM signals generation #######################################*/
     /* Start channel 1 */
     if (HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1) != HAL_OK)
