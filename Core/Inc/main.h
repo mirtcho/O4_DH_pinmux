@@ -71,8 +71,6 @@ void Error_Handler(void);
 #define ADC1_12V_DISPLAY_GPIO_Port GPIOA
 #define ADC1_3V3HALF_Pin GPIO_PIN_3
 #define ADC1_3V3HALF_GPIO_Port GPIOA
-#define DAC1_Out1_LED_Pin GPIO_PIN_4
-#define DAC1_Out1_LED_GPIO_Port GPIOA
 #define ADC3_I12V_Pin GPIO_PIN_0
 #define ADC3_I12V_GPIO_Port GPIOB
 #define ADC2_BTN_Pin GPIO_PIN_2

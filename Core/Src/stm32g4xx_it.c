@@ -213,7 +213,7 @@ void DMA1_Channel1_IRQHandler(void)
   /* USER CODE BEGIN DMA1_Channel1_IRQn 0 */
 
   /* USER CODE END DMA1_Channel1_IRQn 0 */
-	HAL_DMA_IRQHandler(&hdma_adc1);
+  HAL_DMA_IRQHandler(&hdma_adc1);
   /* USER CODE BEGIN DMA1_Channel1_IRQn 1 */
   adc1_ready=1;
   i1++;
@@ -233,13 +233,6 @@ void DMA1_Channel2_IRQHandler(void)
   /* USER CODE BEGIN DMA1_Channel2_IRQn 1 */
   adc2_ready=1;
   i2++;
-  if (adc1_ready && adc2_ready)
-  {
-	  adc1_ready=0;
-	  adc2_ready=0;
-	  HAL_DMA_IRQHandler(&hdma_adc1);
-	  HAL_DMA_IRQHandler(&hdma_adc2);
-  }
   /* USER CODE END DMA1_Channel2_IRQn 1 */
 }
 
@@ -255,9 +248,12 @@ void DMA1_Channel3_IRQHandler(void)
   /* USER CODE BEGIN DMA1_Channel3_IRQn 1 */
   adc3_ready=1;
   i3++;
+  if (adc1_ready && adc2_ready && adc3_ready)
   {
+	  adc1_ready=0;
+	  adc2_ready=0;
 	  adc3_ready=0;
-	  HAL_DMA_IRQHandler(&hdma_adc3);
+	  update_measurements();
   }
   /* USER CODE END DMA1_Channel3_IRQn 1 */
 }

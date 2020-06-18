@@ -79,6 +79,34 @@ static void MX_USART3_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+/* ToDo move later in separate file */
+#define V_REF 2.5f
+struct {
+	float v12v_input;
+	float v12v_display;
+	float v3v3_half;
+	float v5v5_usb;
+	float btn;
+	float i12v;
+	float stm_Vbat;
+	float stm_Vref;
+	float stm_temperature;
+	float btn_lpf;
+}measurement;
+
+void update_measurements()
+{
+	//adc1 data
+	measurement.v12v_input   = V_REF*0.001391602f*adc1_data[0];
+	measurement.v12v_display = V_REF*0.001391602f*adc1_data[1];
+	measurement.v3v3_half	 = V_REF*0.000244141f*adc1_data[2];
+	//adc2 data
+	measurement.v5v5_usb	 = V_REF*0.000537109f*adc2_data[0];
+	measurement.btn			 = V_REF/4096*adc2_data[1];
+	//adc3
+	measurement.i12v		 = V_REF/(35*2048)*adc3_data[0];
+	measurement.stm_Vbat	 = V_REF*3/4096*adc3_data[1];
+}
 /* USER CODE END 0 */
 
 /**
@@ -133,10 +161,6 @@ int main(void)
   {
     Error_Handler();
   }
-  static volatile uint32_t cal1,cal2,cal3;
-  cal1=HAL_ADCEx_Calibration_GetValue(&hadc1, ADC_SINGLE_ENDED);
-  cal2=HAL_ADCEx_Calibration_GetValue(&hadc1, ADC_SINGLE_ENDED);
-  cal3=HAL_ADCEx_Calibration_GetValue(&hadc1, ADC_SINGLE_ENDED);
   HAL_Delay(100);
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&adc1_data[0], 3 );
   HAL_ADC_Start_DMA(&hadc2, (uint32_t*)&adc2_data[0], 2 );
@@ -485,7 +509,7 @@ static void MX_DAC1_Init(void)
   sConfig.DAC_SampleAndHold = DAC_SAMPLEANDHOLD_DISABLE;
   sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
   sConfig.DAC_Trigger2 = DAC_TRIGGER_NONE;
-  sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
+  sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_DISABLE;
   sConfig.DAC_ConnectOnChipPeripheral = DAC_CHIPCONNECT_ENABLE;
   sConfig.DAC_UserTrimming = DAC_TRIMMING_FACTORY;
   if (HAL_DAC_ConfigChannel(&hdac1, &sConfig, DAC_CHANNEL_1) != HAL_OK)
@@ -562,7 +586,7 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 64;
+  htim1.Init.Prescaler = 32;
   htim1.Init.CounterMode = TIM_COUNTERMODE_CENTERALIGNED1;
   htim1.Init.Period = 7353;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
