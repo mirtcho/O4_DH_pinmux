@@ -73,7 +73,7 @@ void update_measurements()
 	//adc2 data
 	measurement.v5v5_usb	 = V_REF*0.000537109f*adc2_data[0];
 	measurement.btn			 = V_REF/4096*adc2_data[1];
-	measurement.btn_lpf		 += ((adc2_data[1]<<4)-measurement.btn_lpf)>>4;
+	measurement.btn_lpf		 += (adc2_data[1]-(measurement.btn_lpf>>4));
 	//adc3
 	measurement.i12v		 = V_REF/(35*2048)*adc3_data[0];
 	measurement.stm_Vbat	 = V_REF*3/4096*adc3_data[1];
